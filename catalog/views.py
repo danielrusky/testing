@@ -94,7 +94,7 @@ class CategoryDetailView(DetailView):
 
 class CategoryUpdateView(UpdateView):
     model = Category
-    fields = ('name', 'description')
+    fields = ('name', 'description', 'image')
     success_url = reverse_lazy('catalog:list_category')
 
 
