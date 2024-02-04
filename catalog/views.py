@@ -1,9 +1,10 @@
-from django.http import JsonResponse
-from django.shortcuts import render
+from django.forms import inlineformset_factory
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, TemplateView, ListView, DeleteView, DetailView
 
-from catalog.models import Product, Category, Contacts
+from catalog.forms import ProductForm, CategoryForm, VersionForm, VersionCategoryForm
+from catalog.models import Product, Category, Version, VersionCategory
 
 
 class ProductListView(ListView):
@@ -23,7 +24,7 @@ class ProductListView(ListView):
 
 class ProductCreateView(CreateView):
     model = Product
-    fields = ('name', 'description', 'price', 'image', 'category')
+    form_class = ProductForm
     success_url = reverse_lazy('catalog:list_product')
 
     def form_valid(self, form):
@@ -38,18 +39,36 @@ class ProductCreateView(CreateView):
         return super().form_valid(form)
 
 
-class ProductUpdateView(UpdateView):
-    model = Product
-    fields = ('name', 'description', 'price', 'image', 'category')
-    success_url = reverse_lazy('catalog:list_product')
-
-
 class ProductDetailView(DetailView):
     model = Product
     extra_context = {
         'title': 'Товар',
     }
     template_name = 'catalog/product_detail.html'
+
+
+class ProductUpdateView(UpdateView):
+    model = Product
+    form_class = ProductForm
+    success_url = reverse_lazy('catalog:list_product')
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        VersionFormset = inlineformset_factory(Product, Version, form=VersionForm, extra=1)
+        if self.request.method == 'POST':
+            context_data['formset'] = VersionFormset(self.request.POST, instance=self.object)
+        else:
+            context_data['formset'] = VersionFormset(instance=self.object)
+
+        return context_data
+
+    def form_valid(self, form):
+        formset = self.get_context_data()['formset']
+        self.object = form.save()
+        if formset.is_valid():
+            formset.instance = self.object
+            formset.save()
+        return super().form_valid(form)
 
 
 class ProductDeleteView(DeleteView):
@@ -62,6 +81,16 @@ class ProductDeleteView(DeleteView):
             return response
         else:
             return super().form_valid(form.errors)
+
+
+def toggle_active(request, slug):
+    products = get_object_or_404(Product, slug=slug)
+    if products.to_publish:
+        products.to_publish = False
+    else:
+        products.to_publish = True
+    products.save()
+    return redirect('catalog:base', slug=products.slug)
 
 
 class CategoryListView(ListView):
@@ -96,6 +125,24 @@ class CategoryUpdateView(UpdateView):
     model = Category
     fields = ('name', 'description', 'image')
     success_url = reverse_lazy('catalog:list_category')
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        VersionCategoryFormset = inlineformset_factory(Category, VersionCategory, form=VersionCategoryForm, extra=1)
+        if self.request.method == 'POST':
+            context_data['formset'] = VersionCategoryFormset(self.request.POST, instance=self.object)
+        else:
+            context_data['formset'] = VersionCategoryFormset(instance=self.object)
+
+        return context_data
+
+    def form_valid(self, form):
+        formset = self.get_context_data()['formset']
+        self.object = form.save()
+        if formset.is_valid():
+            formset.instance = self.object
+            formset.save()
+        return super().form_valid(form)
 
 
 class CategoryDeleteView(DeleteView):

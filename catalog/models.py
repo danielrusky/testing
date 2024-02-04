@@ -46,3 +46,33 @@ class Contacts(models.Model):
     class Meta:
         verbose_name = 'Контакт'
         verbose_name_plural = 'Контакты'
+
+
+class Version(models.Model):
+    version_number = models.IntegerField(verbose_name='номер версии')
+    version_name = models.CharField(max_length=50, verbose_name='название версии')
+    is_current = models.BooleanField(default=False, verbose_name='признак текущаей версии')
+    is_active = models.BooleanField(default=True, verbose_name='активна версия')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name='продукт')
+
+    def __str__(self):
+        return self.product
+
+    class Meta:
+        verbose_name = 'Версия'
+        verbose_name_plural = 'Версии'
+
+
+class VersionCategory(models.Model):
+    version_number = models.IntegerField(verbose_name='номер версии')
+    version_name = models.CharField(max_length=50, verbose_name='название версии')
+    is_current = models.BooleanField(default=False, verbose_name='признак текущаей версии')
+    is_active = models.BooleanField(default=True, verbose_name='активна версия')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name='категория')
+
+    def __str__(self):
+        return self.category
+
+    class Meta:
+        verbose_name = 'Версия каталога'
+        verbose_name_plural = 'Версии каталога'
