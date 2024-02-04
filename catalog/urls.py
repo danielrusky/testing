@@ -2,15 +2,23 @@ from django.urls import path
 
 from catalog import views
 from catalog.apps import CatalogConfig
-from catalog.views import home, contact, product, create_category, create_product
+from catalog.views import ProductListView, ProductCreateView, \
+    ProductUpdateView, ProductDetailView, ProductDeleteView, CategoryListView, CategoryCreateView, CategoryUpdateView, \
+    CategoryDetailView, CategoryDeleteView, ContactsView
 
 app_name = CatalogConfig.name
 
 urlpatterns = [
-    path('', home, name='home'),
-    path('contact/', contact, name='contact'),
-    path('product/<int:pk>', product, name='product'),
-    path('create_category/', create_category, name='create_category'),
-    path('create_product/', create_product, name='create_product'),
+    path('', ProductListView.as_view(), name='list_product'),
+    path('create_product/', ProductCreateView.as_view(), name='create_product'),
+    path('edit_product/<int:pk>', ProductUpdateView.as_view(), name='edit_product'),
+    path('view_product/<int:pk>', ProductDetailView.as_view(), name='view_product'),
+    path('delete_product/<int:pk>', ProductDeleteView.as_view(), name='delete_product'),
+    path('list_category/', CategoryListView.as_view(), name='list_category'),
+    path('create_category/', CategoryCreateView.as_view(), name='create_category'),
+    path('edit_category/<int:pk>', CategoryUpdateView.as_view(), name='edit_category'),
+    path('view_category/<int:pk>', CategoryDetailView.as_view(), name='view_category'),
+    path('delete_category/<int:pk>', CategoryDeleteView.as_view(), name='delete_category'),
+    path('contacts/', ContactsView.as_view(), name='contacts'),
     path('index', views.index, name='index'),
 ]
