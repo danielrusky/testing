@@ -1,0 +1,18 @@
+{% extends 'catalog/base.html' %}
+{% block content %}
+{% load media_tag %}
+<div class="row text-center">
+    <div class="col-sm-3 mb-6 mb-sm-0">
+        <div class="card" style="width: 28rem;">
+            <img src="{{ product.image|media_tag }}" class="card-img-top" width="250" height="250" >
+            <div class="card-body">
+                <h5 class="card-title">{{ product.name }}</h5>
+                <p class="card-text">{{ product.description }}</p>
+                <p class="card-text">Категория: {{ product.category }}</p>
+                <p class="card-text">Цена: {{ product.price }} руб.</p>
+                <a href="{% url 'catalog:home' %}" class="btn btn-primary">К списку товаров</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
